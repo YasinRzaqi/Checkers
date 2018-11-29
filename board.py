@@ -45,7 +45,8 @@ class Board(QFrame):
 
     def mousePosToColRow(self, event):
         '''convert the mouse click event to a row and column'''
-        # x_point =
+        # x_point = QMouseEvent.pos()
+        print("Test: "+self.squareWidth()/event.pos().x())
 
     def squareWidth(self):
         '''returns the width of one square in the board'''
@@ -94,6 +95,8 @@ class Board(QFrame):
 
     def mousePressEvent(self, event):
         print("click location [", event.x(), ",", event.y(), "]")
+        print((int)(event.x()/self.squareWidth()))
+        print((int)(event.y()/self.squareHeight()))
         # todo you could call some game locig here
 
     def keyPressEvent(self, event):
