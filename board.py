@@ -34,7 +34,9 @@ class Board(QFrame):
                            [0,1,0,1,0,1,0,1],
                            [1,0,1,0,1,0,1,0],
                            [0,1,0,1,0,1,0,1]
-                           ]# 2d int/Piece array to story the state of the game
+                           ]
+        # 2d int/Piece array to story the state of the game
+        self.move = []
         self.printBoardArray()
 
 
@@ -94,10 +96,62 @@ class Board(QFrame):
         self.drawPieces(painter)
 
     def mousePressEvent(self, event):
-        print("click location [", event.x(), ",", event.y(), "]")
-        print((int)(event.x()/self.squareWidth()))
-        print((int)(event.y()/self.squareHeight()))
-        # todo you could call some game locig here
+        # print("click location [", event.x(), ",", event.y(), "]")
+        xValue = (int)(event.x()/self.squareWidth())
+        yValue = (int)(event.y()/self.squareHeight())
+        if self.boardArray[yValue][xValue] == 1:
+            self.move = []
+            self.move.append('1')
+            self.move.append(yValue)
+            self.move.append(xValue)
+            print(self.move)
+        elif self.boardArray[yValue][xValue] == 2:
+            self.move = []
+            self.move.append('2')
+            self.move.append(yValue)
+            self.move.append(xValue)
+            print(self.move)
+        else:
+            if len(self.move) > 2:
+                self.move.append(yValue)
+                self.move.append(xValue)
+                print(self.move)
+                if self.move[0] == '1':
+                    self.player1Move()
+                else:
+                    self.player2Move()
+            else:
+                print('Not a Piece')
+        # todo you could call some game logic here
+
+    def player1Move(self):
+        print('Player 1')
+        from_y = self.move[1]
+        from_x = self.move[2]
+        to_y = self.move[3]
+        to_x = self.move[4]
+        temp = self.boardArray[from_y][from_x]
+        self.boardArray[from_y][from_x] = self.boardArray[to_y][to_x]
+        self.boardArray[to_y][to_x] = temp
+        self.update()
+        # painter = QPainter(self)
+        # self.drawBoardSquares(painter)
+        # self.drawPieces(painter)
+
+
+    def player2Move(self):
+        print('Player 2')
+        from_y = self.move[1]
+        from_x = self.move[2]
+        to_y = self.move[3]
+        to_x = self.move[4]
+        temp = self.boardArray[from_y][from_x]
+        self.boardArray[from_y][from_x] = self.boardArray[to_y][to_x]
+        self.boardArray[to_y][to_x] = temp
+        self.update()
+        # painter = QPainter(self)
+        # self.drawBoardSquares(painter)
+        # self.drawPieces(painter)
 
     def keyPressEvent(self, event):
         '''processes key press events if you would like to do any'''
@@ -190,16 +244,14 @@ class Board(QFrame):
                     colour = Qt.red
                 elif self.boardArray[row][col] == 2:
                     colour = Qt.blue
-                elif self.boardArray[row][col] == 0:
-                    colour = Qt.transparent
                 else:
-                    print("Error")
+                    colour = Qt.transparent
                 painter.setBrush(colour)
 
 
                 # Todo draw some the pieces as elipses
                 radius1 = (self.squareWidth() - 2) / 2
-                radius2 = (self.squareHeight() - 2)/ 2
+                radius2 = (self.squareHeight() - 2) / 2
                 # print(radius)
                 center = QPoint(radius1, radius2)
                 print(center)
