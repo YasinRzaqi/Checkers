@@ -26,6 +26,7 @@ class Board(QFrame):
         self.isPaused = False
         self.resetGame()
 
+        self.current_turn = 1
         self.boardArray = [[2,0,2,0,2,0,2,0],
                            [0,2,0,2,0,2,0,2],
                            [2,0,2,0,2,0,2,0],
@@ -35,20 +36,38 @@ class Board(QFrame):
                            [1,0,1,0,1,0,1,0],
                            [0,1,0,1,0,1,0,1]
                            ]
+        self.possibleMoves = [[False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                                ]
         # 2d int/Piece array to story the state of the game
         self.move = []
-        self.printBoardArray()
-
+        # self.printBoardArray()
+    def resetPossibleMoves(self):
+        self.possibleMoves = [[False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              [False, False, False, False, False, False, False, False],
+                              ]
 
     def printBoardArray(self):
         '''prints the boardArray in an arractive way'''
-        print("boardArray:")
-        print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in self.boardArray]))
+        # print("boardArray:")
+        # print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in self.boardArray]))
 
     def mousePosToColRow(self, event):
         '''convert the mouse click event to a row and column'''
         # x_point = QMouseEvent.pos()
-        print("Test: "+self.squareWidth()/event.pos().x())
+        # print("Test: "+self.squareWidth()/event.pos().x())
 
     def squareWidth(self):
         '''returns the width of one square in the board'''
@@ -93,30 +112,32 @@ class Board(QFrame):
         '''paints the board and the pieces of the game'''
         painter = QPainter(self)
         self.drawBoardSquares(painter)
+        self.drawPossibleMoves(painter)
         self.drawPieces(painter)
 
     def mousePressEvent(self, event):
-        # print("click location [", event.x(), ",", event.y(), "]")
         xValue = (int)(event.x()/self.squareWidth())
         yValue = (int)(event.y()/self.squareHeight())
-        if self.boardArray[yValue][xValue] == 1:
+        if self.boardArray[yValue][xValue] == 1 and self.current_turn == 1:
+            self.resetPossibleMoves()
             self.move = []
-            self.move.append('1')
             self.move.append(yValue)
             self.move.append(xValue)
-            print(self.move)
-        elif self.boardArray[yValue][xValue] == 2:
+            self.player1PossibleMoves(yValue,xValue)
+            self.update()
+        elif self.boardArray[yValue][xValue] == 2 and self.current_turn == 2:
             self.move = []
-            self.move.append('2')
             self.move.append(yValue)
             self.move.append(xValue)
-            print(self.move)
+            self.player2PossibleMoves(yValue, xValue)
+            self.update()
         else:
-            if len(self.move) > 2:
+            print(self.move)
+            if len(self.move) > 1 and self.possibleMoves[yValue][xValue] == True:
                 self.move.append(yValue)
                 self.move.append(xValue)
                 print(self.move)
-                if self.move[0] == '1':
+                if self.current_turn == 1:
                     self.player1Move()
                 else:
                     self.player2Move()
@@ -124,34 +145,126 @@ class Board(QFrame):
                 print('Not a Piece')
         # todo you could call some game logic here
 
+    def player1PossibleMoves(self, yValue, xValue):
+        if xValue == 7:
+            if self.boardArray[yValue - 1][xValue - 1] == 2:
+                if xValue - 1 != 0:
+                    if self.boardArray[yValue - 2][xValue - 2] == 0:
+                        self.possibleMoves[yValue - 2][xValue - 2] = True
+                        print("Possible Moves:", self.possibleMoves)
+            if self.boardArray[yValue - 1][xValue - 1] == 0:
+                self.possibleMoves[yValue - 1][xValue - 1] = True
+                print("Possible Moves:", self.possibleMoves)
+        elif xValue == 0:
+            if self.boardArray[yValue - 1][xValue + 1] == 2:
+                if xValue + 1 != 7:
+                    if self.boardArray[yValue - 2][xValue + 2] == 0:
+                        self.possibleMoves[yValue - 2][xValue + 2] = True
+                        print("Possible Moves:", self.possibleMoves)
+            if self.boardArray[yValue - 1][xValue + 1] == 0:
+                self.possibleMoves[yValue - 1][xValue + 1] = True
+                print("Possible Moves:", self.possibleMoves)
+        elif yValue == 7:
+            pass
+        elif yValue == 0:
+            pass
+        else:
+            if self.boardArray[yValue - 1][xValue + 1] == 2:
+                if xValue + 1 != 7:
+                    if self.boardArray[yValue - 2][xValue + 2] == 0:
+                        self.possibleMoves[yValue - 2][xValue + 2] = True
+                        print("Possible Moves:", self.possibleMoves)
+            if self.boardArray[yValue - 1][xValue - 1] == 2:
+                if xValue - 1 != 0:
+                    if self.boardArray[yValue - 2][xValue - 2] == 0:
+                        self.possibleMoves[yValue - 2][xValue - 2] = True
+                        print("Possible Moves:", self.possibleMoves)
+            if self.boardArray[yValue - 1][xValue + 1] == 0:
+                self.possibleMoves[yValue - 1][xValue + 1] = True
+                print("Possible Moves:", self.possibleMoves)
+            if self.boardArray[yValue - 1][xValue - 1] == 0:
+                self.possibleMoves[yValue - 1][xValue - 1] = True
+                print("Possible Moves:", self.possibleMoves)
+        print(self.possibleMoves)
+
+    def player2PossibleMoves(self, yValue, xValue):
+        if xValue == 7:
+            if self.boardArray[yValue + 1][xValue - 1] == 1:
+                if xValue - 1 != 0:
+                    if self.boardArray[yValue + 2][xValue - 2] == 0:
+                        self.possibleMoves[yValue + 2][xValue - 2] = True
+            if self.boardArray[yValue + 1][xValue - 1] == 0:
+                self.possibleMoves[yValue + 1][xValue - 1] = True
+        elif xValue == 0:
+            if self.boardArray[yValue + 1][xValue + 1] == 1:
+                if xValue + 1 != 7:
+                    if self.boardArray[yValue + 2][xValue + 2] == 0:
+                        self.possibleMoves[yValue + 2][xValue + 2] = True
+            if self.boardArray[yValue + 1][xValue + 1] == 0:
+                self.possibleMoves[yValue + 1][xValue + 1] = True
+        elif yValue == 7:
+            pass
+        elif yValue == 0:
+            pass
+        else:
+            if self.boardArray[yValue + 1][xValue + 1] == 1:
+                if xValue + 1 != 7:
+                    if self.boardArray[yValue + 2][xValue + 2] == 0:
+                        self.possibleMoves[yValue + 2][xValue + 2] = True
+            if self.boardArray[yValue + 1][xValue - 1] == 1:
+                if xValue - 1 != 0:
+                    if self.boardArray[yValue + 2][xValue - 2] == 0:
+                        self.possibleMoves[yValue + 2][xValue - 2] = True
+            if self.boardArray[yValue + 1][xValue + 1] == 0:
+                self.possibleMoves[yValue + 1][xValue + 1] = True
+            if self.boardArray[yValue + 1][xValue - 1] == 0:
+                self.possibleMoves[yValue + 1][xValue - 1] = True
+
     def player1Move(self):
         print('Player 1')
-        from_y = self.move[1]
-        from_x = self.move[2]
-        to_y = self.move[3]
-        to_x = self.move[4]
-        temp = self.boardArray[from_y][from_x]
-        self.boardArray[from_y][from_x] = self.boardArray[to_y][to_x]
-        self.boardArray[to_y][to_x] = temp
+        from_y = self.move[0]
+        from_x = self.move[1]
+        to_y = self.move[2]
+        to_x = self.move[3]
+        if abs(from_y - to_y) == 2:
+            self.boardArray[from_y][from_x] = 0
+            self.boardArray[to_y][to_x] = 1
+            if to_x > from_x:
+                self.boardArray[to_y + 1][to_x - 1] = 0
+            else:
+                self.boardArray[to_y + 1][to_x + 1] = 0
+        else:
+            temp = self.boardArray[from_y][from_x]
+            self.boardArray[from_y][from_x] = self.boardArray[to_y][to_x]
+            self.boardArray[to_y][to_x] = temp
         self.update()
-        # painter = QPainter(self)
-        # self.drawBoardSquares(painter)
-        # self.drawPieces(painter)
+        self.move = []
+        self.resetPossibleMoves()
+        self.current_turn = 2
+
 
 
     def player2Move(self):
         print('Player 2')
-        from_y = self.move[1]
-        from_x = self.move[2]
-        to_y = self.move[3]
-        to_x = self.move[4]
-        temp = self.boardArray[from_y][from_x]
-        self.boardArray[from_y][from_x] = self.boardArray[to_y][to_x]
-        self.boardArray[to_y][to_x] = temp
+        from_y = self.move[0]
+        from_x = self.move[1]
+        to_y = self.move[2]
+        to_x = self.move[3]
+        if abs(from_y - to_y) == 2:
+            self.boardArray[from_y][from_x] = 0
+            self.boardArray[to_y][to_x] = 2
+            if to_x > from_x:
+                self.boardArray[to_y - 1][to_x - 1] = 0
+            else:
+                self.boardArray[to_y - 1][to_x + 1] = 0
+        else:
+            temp = self.boardArray[from_y][from_x]
+            self.boardArray[from_y][from_x] = self.boardArray[to_y][to_x]
+            self.boardArray[to_y][to_x] = temp
         self.update()
-        # painter = QPainter(self)
-        # self.drawBoardSquares(painter)
-        # self.drawPieces(painter)
+        self.move = []
+        self.resetPossibleMoves()
+        self.current_turn = 1
 
     def keyPressEvent(self, event):
         '''processes key press events if you would like to do any'''
@@ -215,6 +328,8 @@ class Board(QFrame):
             else:
                 default_colour = Qt.black
             for col in range (0, Board.boardWidth):
+                # if self.possibleMoves[row][col] == True:
+                #     default_colour = Qt.yellow
                 painter.save()
                 colTransformation = col * self.squareWidth()# Todo set this value equal the transformation you would like in the column direction
                 rowTransformation = row * self.squareHeight()# Todo set this value equal the transformation you would like in the column direction
@@ -227,6 +342,21 @@ class Board(QFrame):
                 else:
                     default_colour = Qt.black
 
+    def drawPossibleMoves(self, painter):
+        for row in range(0, Board.boardHeight):
+            default_colour = Qt.transparent
+            for col in range (0, Board.boardWidth):
+                if self.possibleMoves[row][col] == True:
+                    default_colour = Qt.green
+                painter.save()
+                colTransformation = col * self.squareWidth()# Todo set this value equal the transformation you would like in the column direction
+                rowTransformation = row * self.squareHeight()# Todo set this value equal the transformation you would like in the column direction
+                painter.translate(colTransformation,rowTransformation)
+                painter.fillRect(0,0,self.squareWidth(),self.squareHeight(), default_colour) # Todo provide the required arguements
+                painter.restore()
+                default_colour = Qt.transparent
+
+
     def drawPieces(self, painter):
         '''draw the prices on the board'''
         colour = Qt.transparent
@@ -235,8 +365,6 @@ class Board(QFrame):
             for col in range (0, len(self.boardArray[0])):
                 colTransformation = col * self.squareWidth()  # Todo set this value equal the transformation you would like in the column direction
                 rowTransformation = row * self.squareHeight()  # Todo set this value equal the transformation you would like in the column direction
-                print(colTransformation)
-                print(rowTransformation)
                 painter.save()
                 painter.translate(colTransformation, rowTransformation)
                 #Todo choose your colour and set the painter brush to the correct colour
@@ -254,6 +382,5 @@ class Board(QFrame):
                 radius2 = (self.squareHeight() - 2) / 2
                 # print(radius)
                 center = QPoint(radius1, radius2)
-                print(center)
                 painter.drawEllipse(center, radius1, radius2)
                 painter.restore()
