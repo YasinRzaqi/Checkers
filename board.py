@@ -385,6 +385,7 @@ class Board(QFrame):
         painter.setPen(Qt.transparent)
         for row in range(0, len(self.boardArray)):
             for col in range (0, len(self.boardArray[0])):
+                king_colour = Qt.transparent
                 colTransformation = col * self.squareWidth()  # Todo set this value equal the transformation you would like in the column direction
                 rowTransformation = row * self.squareHeight()  # Todo set this value equal the transformation you would like in the column direction
                 painter.save()
@@ -394,14 +395,26 @@ class Board(QFrame):
                     colour = Qt.red
                 elif self.boardArray[row][col] == 2:
                     colour = Qt.blue
+                elif self.boardArray[row][col] == 3:
+                    colour = Qt.red
+                    king_colour = Qt.darkRed
+                elif self.boardArray[row][col] == 4:
+                    colour = Qt.blue
+                    king_colour = Qt.darkBlue
                 else:
                     colour = Qt.transparent
+                    king_colour = Qt.transparent
                 painter.setBrush(colour)
 
 
                 # Todo draw some the pieces as elipses
                 radius1 = (self.squareWidth() - 2) / 2
                 radius2 = (self.squareHeight() - 2) / 2
+                center = QPoint(radius1, radius2)
+                painter.drawEllipse(center, radius1, radius2)
+                painter.setBrush(king_colour)
+                radius1 = (self.squareWidth() - 20) / 2
+                radius2 = (self.squareHeight() - 20) / 2
                 center = QPoint(radius1, radius2)
                 painter.drawEllipse(center, radius1, radius2)
                 painter.restore()
