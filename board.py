@@ -28,12 +28,12 @@ class Board(QFrame):
 
         self.current_turn = 1
         self.boardArray = [[2,0,2,0,2,0,2,0],
-                           [0,2,0,2,0,2,0,2],
-                           [2,0,2,0,2,0,2,0],
+                           [0,2,0,2,0,2,0,4],
+                           [4,0,2,0,2,0,2,0],
                            [0,0,0,0,0,0,0,0],
                            [0,0,0,0,0,0,0,0],
-                           [0,1,0,1,0,1,0,1],
-                           [1,0,1,0,1,0,1,0],
+                           [0,1,0,1,0,1,0,3],
+                           [3,0,1,0,1,0,1,0],
                            [0,1,0,1,0,1,0,1]
                            ]
         self.possibleMoves = [[False, False, False, False, False, False, False, False],
@@ -288,15 +288,19 @@ class Board(QFrame):
                         self.possibleMoves[yValue + 2][xValue - 2] = True
                         capture_available = True
         if yValue != 0 and capture_available == False:
-            if self.boardArray[yValue - 1][xValue + 1] == 0:
-                self.possibleMoves[yValue - 1][xValue + 1] = True
-            if self.boardArray[yValue - 1][xValue - 1] == 0:
-                self.possibleMoves[yValue - 1][xValue - 1] = True
-        if yValue !=7 and capture_available == False:
-            if self.boardArray[yValue + 1][xValue + 1] == 0:
-                self.possibleMoves[yValue + 1][xValue + 1] = True
-            if self.boardArray[yValue + 1][xValue - 1] == 0:
-                self.possibleMoves[yValue + 1][xValue - 1] = True
+            if xValue != 7:
+                if self.boardArray[yValue - 1][xValue + 1] == 0:
+                    self.possibleMoves[yValue - 1][xValue + 1] = True
+            if xValue != 0:
+                if self.boardArray[yValue - 1][xValue - 1] == 0:
+                    self.possibleMoves[yValue - 1][xValue - 1] = True
+        if yValue != 7 and capture_available == False:
+            if xValue != 7:
+                if self.boardArray[yValue + 1][xValue + 1] == 0:
+                    self.possibleMoves[yValue + 1][xValue + 1] = True
+            if xValue != 0:
+                if self.boardArray[yValue + 1][xValue - 1] == 0:
+                    self.possibleMoves[yValue + 1][xValue - 1] = True
 
 
     def player2KingPossibleMoves(self, yValue, xValue):
@@ -358,16 +362,20 @@ class Board(QFrame):
                     if self.boardArray[yValue - 2][xValue - 2] == 0:
                         self.possibleMoves[yValue - 2][xValue - 2] = True
                         capture_available = True
-        if yValue != 7 and capture_available == False:
-            if self.boardArray[yValue + 1][xValue + 1] == 0:
-                self.possibleMoves[yValue + 1][xValue + 1] = True
-            if self.boardArray[yValue + 1][xValue - 1] == 0:
-                self.possibleMoves[yValue + 1][xValue - 1] = True
         if yValue != 0 and capture_available == False:
-            if self.boardArray[yValue - 1][xValue + 1] == 0:
-                self.possibleMoves[yValue - 1][xValue + 1] = True
-            if self.boardArray[yValue - 1][xValue - 1] == 0:
-                self.possibleMoves[yValue - 1][xValue - 1] = True
+            if xValue != 7:
+                if self.boardArray[yValue - 1][xValue + 1] == 0:
+                    self.possibleMoves[yValue - 1][xValue + 1] = True
+            if xValue != 0:
+                if self.boardArray[yValue - 1][xValue - 1] == 0:
+                    self.possibleMoves[yValue - 1][xValue - 1] = True
+        if yValue != 7 and capture_available == False:
+            if xValue != 7:
+                if self.boardArray[yValue + 1][xValue + 1] == 0:
+                    self.possibleMoves[yValue + 1][xValue + 1] = True
+            if xValue != 0:
+                if self.boardArray[yValue + 1][xValue - 1] == 0:
+                    self.possibleMoves[yValue + 1][xValue - 1] = True
 
 
 
