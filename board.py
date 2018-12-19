@@ -5,12 +5,22 @@ from PyQt5.QtGui import QPainter
 from piece import Piece
 
 class Board(QFrame):
-    msg2Statusbar = pyqtSignal(str)
+    updateTimerSignal = pyqtSignal(int)
+    updateTurnSignal = pyqtSignal(int)
+    updateBlueSignal = pyqtSignal(int)
+    updateRedSignal = pyqtSignal(int)
+    updatePlayerSignal = pyqtSignal(int)
 
+    msg2Statusbar = pyqtSignal(str)
     # todo set the board with and height in square
     boardWidth = 8
     boardHeight = 8
-    Speed =300
+    Speed = 300
+    timerSpeed = 1000
+    counter = 600
+    turn = 30
+    redpieces = 12
+    bluepieces = 12
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -25,17 +35,27 @@ class Board(QFrame):
         self.isStarted = False
         self.isPaused = False
         self.resetGame()
+        self.start()
 
         self.current_turn = 1
         self.boardArray = [[2,0,2,0,2,0,2,0],
-                           [0,2,0,2,0,2,0,4],
-                           [4,0,2,0,2,0,2,0],
+                           [0,2,0,2,0,2,0,2],
+                           [2,0,2,0,2,0,2,0],
                            [0,0,0,0,0,0,0,0],
                            [0,0,0,0,0,0,0,0],
-                           [0,1,0,1,0,1,0,3],
-                           [3,0,1,0,1,0,1,0],
+                           [0,1,0,1,0,1,0,1],
+                           [1,0,1,0,1,0,1,0],
                            [0,1,0,1,0,1,0,1]
                            ]
+        # self.boardArray = [[0,0,0,0,0,0,0,0],
+        #                    [0,2,0,0,0,0,0,0],
+        #                    [0,0,1,0,3,0,0,0],
+        #                    [0,1,0,0,0,0,0,0],
+        #                    [0,0,0,0,0,0,0,0],
+        #                    [0,0,0,0,0,0,0,0],
+        #                    [0,0,0,0,0,0,0,0],
+        #                    [0,0,0,0,0,0,0,0]
+        #                    ]
         self.possibleMoves = [[False, False, False, False, False, False, False, False],
                               [False, False, False, False, False, False, False, False],
                               [False, False, False, False, False, False, False, False],
@@ -49,6 +69,7 @@ class Board(QFrame):
         self.move = []
         self.moves_available = False
         # self.printBoardArray()
+
     def resetPossibleMoves(self):
         self.possibleMoves = [[False, False, False, False, False, False, False, False],
                               [False, False, False, False, False, False, False, False],
@@ -79,18 +100,14 @@ class Board(QFrame):
         return self.contentsRect().height() / Board.boardHeight
 
     def start(self):
-        '''starts game'''
         if self.isPaused:
             return
-
         self.isStarted = True
         self.isWaitingAfterLine = False
         self.numLinesRemoved = 0
         self.resetGame()
-
-        self.msg2Statusbar.emit(str("status message"))
-
-        self.timer.start(Board.Speed, self)
+        self.msg2Statusbar.emit(str("Game Started"))
+        self.timer.start(Board.timerSpeed, self)
 
     def pause(self):
         '''pauses game'''
@@ -120,6 +137,7 @@ class Board(QFrame):
         xValue = (int)(event.x()/self.squareWidth())
         yValue = (int)(event.y()/self.squareHeight())
         if self.boardArray[yValue][xValue] == 1 and self.current_turn == 1 and self.moves_available == False:
+            self.updateTurnSignal.emit(Board.turn)
             self.resetPossibleMoves()
             self.move = []
             self.move.append(yValue)
@@ -380,6 +398,7 @@ class Board(QFrame):
 
 
     def player1Move(self):
+        Board.turn = 30
         from_y = self.move[0]
         from_x = self.move[1]
         to_y = self.move[2]
@@ -418,8 +437,11 @@ class Board(QFrame):
             self.move = []
             self.resetPossibleMoves()
             self.current_turn = 2
+        # self.captureEvent()
+        self.changeTurnEvent()
 
     def player2Move(self):
+        Board.turn = 30
         from_y = self.move[0]
         from_x = self.move[1]
         to_y = self.move[2]
@@ -446,7 +468,7 @@ class Board(QFrame):
             self.update()
             self.move = []
             self.resetPossibleMoves()
-            if self.boardArray[to_y][to_x] == 1:
+            if self.boardArray[to_y][to_x] == 2:
                 self.player2ConsecutiveMoves(to_y,to_x)
             else:
                 self.player2KingConsecutiveMoves(to_y,to_x)
@@ -458,6 +480,8 @@ class Board(QFrame):
             self.move = []
             self.resetPossibleMoves()
             self.current_turn = 1
+        # self.captureEvent()
+        self.changeTurnEvent()
 
     def player1ConsecutiveMoves(self,yValue,xValue):
         if yValue == 0 or yValue == 1:
@@ -639,11 +663,50 @@ class Board(QFrame):
     def timerEvent(self, event):
         '''handles timer event'''
         #todo adapter this code to handle your timers
-
         if event.timerId() == self.timer.timerId():
-            pass
+            if (self.current_turn == 1 and Board.turn == 0):
+                self.current_turn = 2
+                self.changeTurnEvent()
+                Board.turn = 30
+            elif(self.current_turn == 2 and Board.turn == 0):
+                self.current_turn = 2
+                self.changeTurnEvent()
+                Board.turn = 30
+            Board.turn = Board.turn - 1
+            self.updateTurnSignal.emit(Board.turn)
+            if(Board.counter == 0):
+                if(Board.bluepieces < Board.redpieces):
+                    self.msg2Statusbar.emit(str("Game Over: Player 1 Wins"))
+                elif(Board.bluepieces > Board.redpieces):
+                    self.msg2Statusbar.emit(str("Game Over: Player 2 Wins"))
+                else:
+                    self.msg2Statusbar.emit(str("Game Over: Draw"))
+            if(Board.bluepieces == 0):
+                self.msg2Statusbar.emit(str("Game Over: Player 1 Wins"))
+
+            if(Board.redpieces == 0):
+                self.msg2Statusbar.emit(str("Game Over: Player 2 Wins"))
+            Board.counter = Board.counter - 1
+            # print('timerEvent()', Board.counter)
+            self.updateTimerSignal.emit(Board.counter)
         else:
             super(Board, self).timerEvent(event)
+
+    def captureEvent(self):
+        '''handles player timer event'''
+        if(self.current_turn == 1):
+            Board.bluepieces = Board.bluepieces - 1
+            self.updateBlueSignal.emit(Board.bluepieces)
+            print('BluePiecesRemaining', Board.bluepieces)
+        elif(self.current_turn == 2):
+            Board.redpieces = Board.redpieces - 1
+            self.updateRedSignal.emit(Board.redpieces)
+            print('RedPiecesRemaining', Board.redpieces)
+
+    def changeTurnEvent(self):
+        '''handles player turn event'''
+        self.updatePlayerSignal.emit(self.current_turn)
+
 
     def resetGame(self):
         '''clears pieces from the board'''
